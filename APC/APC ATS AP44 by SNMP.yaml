@@ -1,0 +1,687 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 3dcd5bbe90534f9e8eb5c2d53756af63
+      name: Templates/Power
+  templates:
+    - uuid: 9c139f9b3fa947da893c05c70145b27a
+      template: 'APC ATS by SNMP vbulgakov'
+      name: 'APC ATS by SNMP vbulgakov'
+      description: |
+        Template Power APC ATS
+        
+        MIBs used:
+        PowerNet-MIB
+        SNMPv2-MIB
+
+      groups:
+        - name: Templates/Power
+      items:
+        - uuid: 89623e68919e443f8b2c227048b182b0
+          name: 'Active source'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.2.0
+          key: 'active.source[APC.ATS]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          valuemap:
+            name: active.source
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: information
+          triggers:
+            - uuid: c50442cbb5c844df81ff26a2d8ffc3fa
+              expression: 'change(/APC ATS by SNMP vbulgakov/active.source[APC.ATS])<>0'
+              name: 'APC ATS: Active Source has been changes'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: ff68ad79ea3846f8b76dd46b98458fef
+          name: 'Current status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.4.0
+          key: 'current.status[APC.ATS]'
+          value_type: FLOAT
+          valuemap:
+            name: source.status
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+        - uuid: e6c2cd558284428795b3d949a485ebfa
+          name: 'Firmware version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.2.0
+          key: 'firmware.version[APC.ATS]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: information
+        - uuid: a6213af27134468ab1bb4cfa958b3aa2
+          name: 'Input voltage (Source A)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.3.1.3.1.1.1
+          key: 'input.voltage.source.a[APC.ATS]'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: ec5b14f55e8a4f00a61ba37501aeaecb
+              expression: 'min(/APC ATS by SNMP vbulgakov/input.voltage.source.a[APC.ATS],5m) > 0 and (min(/APC ATS by SNMP vbulgakov/input.voltage.source.a[APC.ATS],5m) > {$ATS.MAX_VOLTAGE_THRESHOLD} or max(/APC ATS by SNMP vbulgakov/input.voltage.source.a[APC.ATS],5m) < {$ATS.MIN_VOLTAGE_THRESHOLD})'
+              name: 'APC ATS: Unacceptable input voltage on Source A'
+              event_name: 'APC UPS: Unacceptable input voltage on Source A (out of range {$ATS.MIN_POWER_THRESHOLD}-{$ATS.MAX_POWER_THRESHOLD}V for 5 minutes'
+              opdata: 'Current voltage: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 329bf0608e014dcd9d010f97e97e64f1
+          name: 'Input voltage (Source B)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.3.3.1.3.2.1.1
+          key: 'input.voltage.source.b[APC.ATS]'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: e333a659fc924c0ba72668cee1f15f9a
+              expression: 'min(/APC ATS by SNMP vbulgakov/input.voltage.source.b[APC.ATS],5m) > 0 and (min(/APC ATS by SNMP vbulgakov/input.voltage.source.b[APC.ATS],5m) > {$ATS.MAX_VOLTAGE_THRESHOLD} or max(/APC ATS by SNMP vbulgakov/input.voltage.source.b[APC.ATS],5m) < {$ATS.MIN_VOLTAGE_THRESHOLD})'
+              name: 'APC ATS: Unacceptable input voltage on Source B'
+              event_name: 'APC UPS: Unacceptable input voltage on Source B (out of range {$ATS.MIN_POWER_THRESHOLD}-{$ATS.MAX_POWER_THRESHOLD}V for 5 minutes'
+              opdata: 'Current voltage: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 2817970f3edd458c88dc87eb0761d1e5
+          name: Model
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.5.0
+          key: 'model.name[APC.ATS]'
+          delay: 12h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: ced8f853dcdb40f38b324bce92cdb39a
+          name: 'Nominal current'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.9.0
+          key: 'nominal.current[APC.ATS]'
+          delay: 12h
+          value_type: FLOAT
+          trends: '0'
+          units: A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 9744798ed260421097281c0f5b1083f6
+          name: 'Nominal frequency'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.8.0
+          key: 'nominal.frequency[APC.ATS]'
+          delay: 12h
+          value_type: FLOAT
+          trends: '0'
+          units: Hz
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: e83a8ba762e7400c9a7a18ed59de41b5
+          name: 'Nominal voltage'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.7.0
+          key: 'nominal.voltage[APC.ATS]'
+          delay: 12h
+          value_type: FLOAT
+          trends: '0'
+          units: V
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 5ad4303a7b4e45b58a6a8ec313b966c1
+          name: 'Output current'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.4.1.1.1
+          key: 'output.current[APC.ATS]'
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: 56091e419808415d8f61632d8e83fd79
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.current[APC.ATS],5m) > {$ATS.MAX_CURRENT_THRESHOLD}'
+              name: 'APC ATS: Output current (Amps) exceeded the threshold'
+              opdata: 'Current current: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 1daf3882fa30465383fcc40ac900a65d
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.current[APC.ATS],5m) > {$ATS.NEAR_MAX_CURRENT_THRESHOLD}'
+              name: 'APC ATS: Output current (Amps) near to max threshold'
+              opdata: 'Current current: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 47cb3a9d12e14f86a46a5f218a52ab9d
+          name: 'Output frequency'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.2.1.4.1
+          key: 'output.frequency[APC.ATS]'
+          value_type: FLOAT
+          units: Hz
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: fe2733191a7e4508af9d6f625f48188c
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.frequency[APC.ATS],5m) > 0 and (min(/APC ATS by SNMP vbulgakov/output.frequency[APC.ATS],5m) > {$ATS.MAX_FREQUENCY_THRESHOLD} or max(/APC ATS by SNMP vbulgakov/output.frequency[APC.ATS],5m) < {$ATS.MIN_FREQUENCY_THRESHOLD})'
+              name: 'APC ATS: Unacceptable output frequency'
+              event_name: 'APC UPS: Unacceptable output frequency'
+              opdata: 'Current frequency: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 20489c7546a24f48af5ab8b6feec1af2
+          name: 'Output load'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.16.1.1.1
+          key: 'output.load[APC.ATS]'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: a18ca55daebf4ccf88fa3022e1593cba
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.load[APC.ATS],5m) > {$ATS.MAX_OUTPUT_PERCENT}'
+              name: 'APC ATS: Output load > 80%'
+              event_name: 'APC ATS: Output load > 80% for 5 minutes'
+              opdata: 'Current current: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: d2132290cd2346ed997d5a1dbc55447b
+          name: 'Output power'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.13.1.1.1
+          key: 'output.power[APC.ATS]'
+          value_type: FLOAT
+          units: W
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: be03a51deacb4e068e35a531eb747a75
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.power[APC.ATS],5m) > {$ATS.MAX_POWER_THRESHOLD}'
+              name: 'APC ATS: Output power exceeds the threshold'
+              event_name: 'APC ATS: Output power > 3680W for 5 minutes'
+              opdata: 'Current current: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 995847313ba143d5ae7ec450007d9796
+          name: 'Output voltage'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.4.3.1.3.1.1.1
+          key: 'output.voltage[APC.ATS]'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: power
+          triggers:
+            - uuid: a948e6b7613544ca8e3dfab52f907b22
+              expression: 'min(/APC ATS by SNMP vbulgakov/output.voltage[APC.ATS],5m) > 0 and (min(/APC ATS by SNMP vbulgakov/output.voltage[APC.ATS],5m) > {$ATS.MAX_VOLTAGE_THRESHOLD} or max(/APC ATS by SNMP vbulgakov/output.voltage[APC.ATS],5m) < {$ATS.MIN_VOLTAGE_THRESHOLD})'
+              name: 'APC ATS: Unacceptable output voltage'
+              event_name: 'APC UPS: Unacceptable output voltage'
+              opdata: 'Current voltage: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: f3716019d31a44009d241ccd823413ba
+          name: 'Overall health status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.1.0
+          key: 'overall.health.status[APC.ATS]'
+          value_type: FLOAT
+          valuemap:
+            name: source.status
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 0b35ed09194b4b7daa4804202cb0c95f
+              expression: 'last(/APC ATS by SNMP vbulgakov/overall.health.status[APC.ATS],#3)<>2'
+              name: 'APC ATS: Overall health status is not OK'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 9c56d9e15c86465c989155af99a7bac1
+          name: 'Status (Source A)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.12.0
+          key: 'status.source.a[APC.ATS]'
+          value_type: FLOAT
+          valuemap:
+            name: source.status
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 1e549da0e2bf484bbe0953f69b622975
+              expression: 'last(/APC ATS by SNMP vbulgakov/status.source.a[APC.ATS],#3)<>2'
+              name: 'APC ATS: Source A status is not OK'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 11812c815ff34a57afc5e0daf38f61ad
+          name: 'Status (Source B)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.5.1.13.0
+          key: 'status.source.b[APC.ATS]'
+          value_type: FLOAT
+          valuemap:
+            name: source.status
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 174dcb820b13427091ce6a51bef77b91
+              expression: 'last(/APC ATS by SNMP vbulgakov/status.source.b[APC.ATS],#3)<>2'
+              name: 'APC ATS: Source B status is not OK'
+              priority: HIGH
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: d9e638944e37439ba350ce0f323bb685
+          name: 'System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: 'system.contact[sysContact.0]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed
+            node, together with information on how to contact this person.  If no contact
+            information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: ae1a01dcb4254582ae705122049b1657
+          name: 'System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'system.descr[sysDescr.0]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            A textual description of the entity. This value should
+            include the full name and version identification of the system's hardware type, software operating-system, and
+            networking software.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: cf43a24c401b44aba4a53e095ea00da5
+          name: 'Uptime (hardware)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          key: 'system.hw.uptime[hrSystemUptime.0]'
+          delay: 30s
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            The amount of time since this host was last initialized. Note that this is different from sysUpTime in the SNMPv2-MIB [RFC1907] because sysUpTime is the uptime of the network management portion of the system.
+          preprocessing:
+            - type: CHECK_NOT_SUPPORTED
+              parameters:
+                - '-1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 56912f3e8b51430aa7624087bc1a504f
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: 'system.location[sysLocation.0]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The physical location of this node (e.g., `telephone closet, 3rd floor').  If the location is unknown, the value is the zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: e4b35f4c40ab4227a876d568afdb02b0
+          name: 'System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: 'system.name[sysName.0]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            An administratively-assigned name for this managed node.By
+            convention, this is the node's fully-qualified domain name.  If the name is unknown,
+            the value is the zero-length string.
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: e119d658735c4f738a207445e3d9fc5d
+              expression: 'last(/APC ATS by SNMP vbulgakov/system.name[sysName.0],#1)<>last(/APC ATS by SNMP vbulgakov/system.name[sysName.0],#2) and length(last(/APC ATS by SNMP vbulgakov/system.name[sysName.0]))>0'
+              name: 'APC ATS: System name has changed'
+              event_name: 'APC ATS: System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'The name of the system has changed. Acknowledge to close the problem manually.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: b7294c95b6fe42d5935f116b793024dd
+          name: 'Uptime (network)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          delay: 30s
+          trends: '0'
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            The time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 5f69e983455943df903c2ec2a170dd74
+          name: 'System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: 'system.objectid[sysObjectID.0]'
+          delay: 15m
+          value_type: CHAR
+          trends: '0'
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor's authoritative identification of the network management
+            subsystem contained in the entity.  This value is allocated within the SMI enterprises
+            subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining`what
+            kind of box' is being managed.  For example, if vendor`Flintstones, Inc.' was
+            assigned the subtree1.3.6.1.4.1.4242, it could assign the identifier 1.3.6.1.4.1.4242.1.1
+            to its `Fred Router'.
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6f104105e28042cf9c9cd1dbda257a23
+          name: 'Serial number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.318.1.1.8.1.6.0
+          key: 'system.sn[APC.ATS]'
+          delay: 12h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 2e0d0adb72e04b1da37c9da7e62e83a8
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible values:
+            0 - not available
+            1 - available
+            2 - unknown
+          valuemap:
+            name: zabbix.host.available
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 5c88f94747a14778a0306642d0a1b2dd
+              expression: 'max(/APC ATS by SNMP vbulgakov/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'APC ATS: No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
+      tags:
+        - tag: class
+          value: power
+        - tag: target
+          value: apc
+      macros:
+        - macro: '{$ATS.MAX_CURRENT_THRESHOLD}'
+          value: '25'
+          description: 'Maximum output current for trigger expression.'
+        - macro: '{$ATS.MAX_FREQUENCY_THRESHOLD}'
+          value: '50.3'
+          description: 'Maximum input frequency for trigger expression.'
+        - macro: '{$ATS.MAX_OUTPUT_PERCENT}'
+          value: '80'
+          description: 'Maximum output load in % for trigger expression.'
+        - macro: '{$ATS.MAX_POWER_THRESHOLD}'
+          value: '3680'
+          description: 'Maximum output power for trigger expression.'
+        - macro: '{$ATS.MAX_VOLTAGE_THRESHOLD}'
+          value: '253'
+          description: 'Maximum input voltage for trigger expression.'
+        - macro: '{$ATS.MIN_CURRENT_THRESHOLD}'
+          value: '5'
+          description: 'Minimum output current for trigger expression.'
+        - macro: '{$ATS.MIN_FREQUENCY_THRESHOLD}'
+          value: '49.7'
+          description: 'Minimum input frequency for trigger expression.'
+        - macro: '{$ATS.MIN_VOLTAGE_THRESHOLD}'
+          value: '207'
+          description: 'Minimum input voltage for trigger expression.'
+        - macro: '{$ATS.NEAR_MAX_CURRENT_THRESHOLD}'
+          value: '20'
+          description: 'Near maximum output current for trigger expression.'
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+          description: 'The time interval for SNMP agent availability trigger expression.'
+        - macro: '{$TIME.PERIOD}'
+          value: 5m
+          description: 'Time period for trigger expression.'
+      valuemaps:
+        - uuid: 536c0da3fc0f423ea58df9df350417c4
+          name: active.source
+          mappings:
+            - value: '1'
+              newvalue: 'Source A'
+            - value: '2'
+              newvalue: 'Source B'
+        - uuid: 394b6473c1364c10932352dc0ac88ab5
+          name: source.status
+          mappings:
+            - value: '1'
+              newvalue: Fail
+            - value: '2'
+              newvalue: Ok
+        - uuid: b0d5217267274f8785f8350965546c07
+          name: zabbix.host.available
+          mappings:
+            - value: '0'
+              newvalue: 'not available'
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: unknown
+  triggers:
+    - uuid: 0463602767914157b69266f61d852d4e
+      expression: |
+        (last(/APC ATS by SNMP vbulgakov/system.hw.uptime[hrSystemUptime.0])>0 and last(/APC ATS by SNMP vbulgakov/system.hw.uptime[hrSystemUptime.0])<10m)
+        or (last(/APC ATS by SNMP vbulgakov/system.hw.uptime[hrSystemUptime.0])=0 and last(/APC ATS by SNMP vbulgakov/system.net.uptime[sysUpTime.0])<10m)
+      name: 'APC ATS: Host has been restarted'
+      event_name: 'APC ATS: {HOST.NAME} has been restarted (uptime < 10m)'
+      priority: WARNING
+      description: 'Uptime is less than 10 minutes.'
+      manual_close: 'YES'
+      dependencies:
+        - name: 'APC ATS: No SNMP data collection'
+          expression: 'max(/APC ATS by SNMP vbulgakov/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+      tags:
+        - tag: scope
+          value: notice
+  graphs:
+    - uuid: 1d4c3923969846a881257230b02b4c99
+      name: 'APC ATS: Output load'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'APC ATS by SNMP vbulgakov'
+            key: 'output.load[APC.ATS]'
+    - uuid: 0c132eb5cbe345399c16f071de4c651f
+      name: 'APC UPS: Voltage'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'APC ATS by SNMP vbulgakov'
+            key: 'input.voltage.source.a[APC.ATS]'
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'APC ATS by SNMP vbulgakov'
+            key: 'output.voltage[APC.ATS]'
